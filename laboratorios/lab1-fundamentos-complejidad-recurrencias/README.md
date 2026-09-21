@@ -1,3 +1,4 @@
+# Laboratorio evaluativo 01 — Fundamentos, complejidad y recurrencias
 
 ## Parte 1 — Analizar el algoritmo antes de comprar hardware
 La Secretaría debería analizar primero el algoritmo antes de comprar un servidor más rápido, porque el algoritmo entrega el resultado correcto y ha funcionado por más de ocho años, pero al aumentar la cantidad de registros de 20.000 a 1.200.000 significaría que el algoritmo no funcionaría en el tiempo que el sistema necesita. En el caso de Tamiza, el insertion sort es correcto porque logra ordenar los registros por índice de riesgo y genera la lista que se necesita. El problema es que no alcanza a terminar de ordenar los 1.200.000 registros dentro de la ventana de cuatro horas, entre las 2:00 a. m. y las 6:00 a. m. Por lo tanto, el problema no es que el resultado sea incorrecto, sino que el algoritmo no cumple con la restricción de tiempo que tiene el sistema.
@@ -19,6 +20,8 @@ También existe una obligación adicional sobre la corrección del ordenamiento 
 
 ## Parte 3 — Peor caso, mejor caso y caso promedio, demostrados en Python
 
+Código de esta parte: [código de la Parte 3](parte3_casos.py)
+
 ### 3.1 Explicación
 
 - **Peor caso:** se toma el máximo de T(I) sobre todas las entradas de tamaño n. Es una cota superior: ningún lote de ese tamaño puede costar más. En insertion sort (orden de mayor a menor) se alcanza cuando el lote llega en el orden contrario al que se busca (de menor a mayor): cada elemento nuevo recorre todo el prefijo ya ordenado, lo que da n(n−1)/2 comparaciones, es decir, O(n²).
@@ -34,7 +37,7 @@ También existe una obligación adicional sobre la corrección del ordenamiento 
 
 ### 3.2 Demostración experimental
 
-**Cómo se hizo:** se ejecutó `parte3_casos.py`, que corre `insertion_sort` sobre los tres escenarios con tamaños n = 100, 200, 400, 800, 1600, 3200 y 6400. Los escenarios A y B usan la semilla 42 para que el experimento sea reproducible; C no usa aleatoriedad. El B se genera con el 98 % del lote en el orden de salida (la lista de ayer) y un 2 % de valores al azar anexado al final (los resultados nuevos del día). Se cronometró únicamente la llamada al algoritmo con `time.perf_counter()`; la generación de los datos y las verificaciones de correctitud (resultado ordenado y sin registros perdidos) quedan fuera del cronómetro. Las comparaciones las cuenta el propio algoritmo, por lo que son exactas y reproducibles; los tiempos dependen de la máquina y pueden variar entre ejecuciones.
+**Cómo se hizo:** los generadores de los tres escenarios están en [`datos.py`](datos.py) e `insertion_sort` está en [`algoritmos.py`](algoritmos.py). Se ejecutó `parte3_casos.py`, que corre `insertion_sort` sobre los tres escenarios con tamaños n = 100, 200, 400, 800, 1600, 3200 y 6400. Los escenarios A y B usan la semilla 42 para que el experimento sea reproducible; C no usa aleatoriedad. El B se genera con el 98 % del lote en el orden de salida (la lista de ayer) y un 2 % de valores al azar anexado al final (los resultados nuevos del día). Se cronometró únicamente la llamada al algoritmo con `time.perf_counter()`; la generación de los datos y las verificaciones de correctitud (resultado ordenado y sin registros perdidos) quedan fuera del cronómetro. Las comparaciones las cuenta el propio algoritmo, por lo que son exactas y reproducibles; los tiempos dependen de la máquina y pueden variar entre ejecuciones.
 
 | n | Comparaciones A (aleatorio) | Comparaciones B (casi ordenado) | Comparaciones C (inverso) |
 |---|---|---|---|
@@ -70,6 +73,8 @@ Tiempos medidos (segundos), como referencia:
 **Contraste con la predicción:** Los resultados coinciden con lo esperado: C es el peor, B el mejor y A queda en un punto intermedio. Sin embargo, B no alcanza el mejor caso teórico, que ocurre cuando los datos están completamente ordenados, porque ese 2 % de elementos desordenados aumenta junto con el tamaño de la entrada. Por eso, B sigue teniendo un crecimiento cuadrático, aunque con un costo mucho menor que C. Esto muestra que insertion sort funciona muy bien con datos casi ordenados, pero su peor caso sigue aumentando de forma cuadrática. Finalmente, A representa una muestra del caso promedio, aunque no el promedio exacto, porque solo se utilizó una semilla.
 
 ## Parte 4 - Complejidad de merge sort e insertion sort: cálculo y validación
+
+Código de esta parte: [código de la Parte 4](parte4_complejidad.py)
 
 ### 4.1 Cálculo teórico
 
