@@ -16,3 +16,55 @@ En la parte ética, como un fallo del proceso puede afectar a una persona concre
 Otro caso afecta al operador del centro de contacto. Si recibe una lista parcial, puede realizar llamadas a pacientes de menor riesgo mientras existen pacientes de mayor riesgo que todavía no aparecen. Aunque esté siguiendo las instrucciones del sistema, no es debido trabajar con información en la que no puede confiar completamente. En este caso, el operador asume ese riesgo, mientras que el problema técnico está relacionado con la decisión de utilizar un proceso que no garantiza una lista completa antes de comenzar las llamadas.
 
 También existe una obligación adicional sobre la corrección del ordenamiento en Tamiza, el orden representa una prioridad de atención, por lo que un error podría hacer que un paciente con mayor riesgo sea contactado después que otro con menor riesgo. Además, pueden existir muchos empates porque los índices van de 0 a 1000. Tanto insertion sort como merge sort pueden conservar el orden anterior de los registros con el mismo índice si se implementan de forma estable.
+
+## Parte 3 — Peor caso, mejor caso y caso promedio, demostrados en Python
+
+### 3.1 Explicación
+
+- **Peor caso:** se toma el máximo de T(I) sobre todas las entradas de tamaño n. Es una cota superior: ningún lote de ese tamaño puede costar más. En insertion sort (orden de mayor a menor) se alcanza cuando el lote llega en el orden contrario al que se busca (de menor a mayor): cada elemento nuevo recorre todo el prefijo ya ordenado, lo que da n(n−1)/2 comparaciones, es decir, O(n²).
+- **Mejor caso:** se toma el mínimo de T(I) sobre las mismas entradas de tamaño n. Es una cota inferior. En insertion sort se alcanza cuando el lote ya viene en el orden de salida (de mayor a menor): cada elemento se compara una sola vez y se queda en su lugar, con n−1 comparaciones, es decir, O(n).
+- **Caso promedio:** se toma el promedio de T(I) sobre las mismas n! entradas de tamaño n, suponiendo que todos los órdenes iniciales son igualmente probables. En insertion sort cada elemento recorre en promedio la mitad del prefijo ya ordenado, lo que da cerca de n²/4 comparaciones, es decir, O(n²).
+
+**¿Cuál usaría para decidir si Tamiza entra en producción?** Yo usaría el peor caso. La ventana de cuatro horas es estricta: si un solo lote la excede, el proceso falla, y no importa que la mayoría de los días sí quepa. Con una restricción así, lo que hay que garantizar es que incluso el lote más desfavorable de tamaño n termine dentro de la ventana, y solo el peor caso es una cota que ningún lote de ese tamaño puede superar.
+
+**Predicción antes de medir**
+- **Peor caso para insertion sort: escenario C (orden inverso)** porque el algoritmo ordena de mayor a menor y ese lote llega de menor a mayor. Cada elemento nuevo es mayor que todos los anteriores, así que se desplaza hasta el inicio y se hacen n(n−1)/2 comparaciones.
+- **Mejor caso: escenario B (casi ordenado)** porque el 98% del lote ya está en el orden de salida y esos elementos casi no se desplazan. Solo el 2% del final necesita moverse. (El mejor caso teórico puro sería un lote 100% ordenado, con n−1 comparaciones, que no está entre los tres escenarios; B es el más cercano.)
+- **Caso promedio: escenario A (aleatorio)** porque un orden aleatorio es una muestra típica de todas las permutaciones posibles, así que cada elemento recorre en promedio la mitad del prefijo, con cerca de n²/4 comparaciones.
+
+### 3.2 Demostración experimental
+
+**Cómo se hizo:** se ejecutó `parte3_casos.py`, que corre `insertion_sort` sobre los tres escenarios con tamaños n = 100, 200, 400, 800, 1600, 3200 y 6400. Los escenarios A y B usan la semilla 42 para que el experimento sea reproducible; C no usa aleatoriedad. El B se genera con el 98 % del lote en el orden de salida (la lista de ayer) y un 2 % de valores al azar anexado al final (los resultados nuevos del día). Se cronometró únicamente la llamada al algoritmo con `time.perf_counter()`; la generación de los datos y las verificaciones de correctitud (resultado ordenado y sin registros perdidos) quedan fuera del cronómetro. Las comparaciones las cuenta el propio algoritmo, por lo que son exactas y reproducibles; los tiempos dependen de la máquina y pueden variar entre ejecuciones.
+
+| n | Comparaciones A (aleatorio) | Comparaciones B (casi ordenado) | Comparaciones C (inverso) |
+|---|---|---|---|
+| 100 | 2.542 | 193 | 4.950 |
+| 200 | 9.970 | 582 | 19.900 |
+| 400 | 40.436 | 1.607 | 79.800 |
+| 800 | 160.484 | 7.185 | 319.600 |
+| 1600 | 648.481 | 25.834 | 1.279.200 |
+| 3200 | 2.533.103 | 98.707 | 5.118.400 |
+| 6400 | 10.276.753 | 409.342 | 20.476.800 |
+
+Tiempos medidos (segundos), como referencia:
+
+| n | Tiempo A | Tiempo B | Tiempo C |
+|---|---|---|---|
+| 100 | 0,00019 | 0,00001 | 0,00026 |
+| 200 | 0,00053 | 0,00003 | 0,00113 |
+| 400 | 0,00223 | 0,00010 | 0,00437 |
+| 800 | 0,01014 | 0,00050 | 0,01945 |
+| 1600 | 0,04344 | 0,00183 | 0,08597 |
+| 3200 | 0,17429 | 0,00682 | 0,34479 |
+| 6400 | 0,71617 | 0,02893 | 1,42986 |
+
+![Comparaciones vs. tamaño](graficas/parte3_comparaciones.png)
+
+![Tiempo vs. tamaño](graficas/parte3_tiempo.png)
+
+**Resultados**
+- **Peor caso: escenario C.** Es el que más comparaciones tiene y más tiempo consume en todos los tamaños. Sus comparaciones coinciden exactamente con n(n−1)/2. Al duplicar n, las comparaciones y el tiempo se multiplican por 4, lo que confirma un crecimiento cuadrático O(n²).
+- **Mejor caso: escenario B.** Es el que menos comparaciones tiene y menos tiempo necesita: con n = 6400 hace unas 50 veces menos comparaciones que C y tarda 0,029 s frente a 1,43 s. Aun así, no crece de forma lineal en este rango: al duplicar n las comparaciones se multiplican por cerca de 4.
+- **Se aproxima al caso promedio: escenario A.** Con n = 6400 hace 10.276.753 comparaciones, muy cerca de n²/4 = 10.240.000, y aproximadamente la mitad de las de C en todos los tamaños. Y también crece cuadráticamente.
+
+**Contraste con la predicción:** Los resultados coinciden con lo esperado: C es el peor, B el mejor y A queda en un punto intermedio. Sin embargo, B no alcanza el mejor caso teórico, que ocurre cuando los datos están completamente ordenados, porque ese 2 % de elementos desordenados aumenta junto con el tamaño de la entrada. Por eso, B sigue teniendo un crecimiento cuadrático, aunque con un costo mucho menor que C. Esto muestra que insertion sort funciona muy bien con datos casi ordenados, pero su peor caso sigue aumentando de forma cuadrática. Finalmente, A representa una muestra del caso promedio, aunque no el promedio exacto, porque solo se utilizó una semilla.
