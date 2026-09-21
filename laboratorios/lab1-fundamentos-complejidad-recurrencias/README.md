@@ -68,3 +68,93 @@ Tiempos medidos (segundos), como referencia:
 - **Se aproxima al caso promedio: escenario A.** Con n = 6400 hace 10.276.753 comparaciones, muy cerca de n²/4 = 10.240.000, y aproximadamente la mitad de las de C en todos los tamaños. Y también crece cuadráticamente.
 
 **Contraste con la predicción:** Los resultados coinciden con lo esperado: C es el peor, B el mejor y A queda en un punto intermedio. Sin embargo, B no alcanza el mejor caso teórico, que ocurre cuando los datos están completamente ordenados, porque ese 2 % de elementos desordenados aumenta junto con el tamaño de la entrada. Por eso, B sigue teniendo un crecimiento cuadrático, aunque con un costo mucho menor que C. Esto muestra que insertion sort funciona muy bien con datos casi ordenados, pero su peor caso sigue aumentando de forma cuadrática. Finalmente, A representa una muestra del caso promedio, aunque no el promedio exacto, porque solo se utilizó una semilla.
+
+## Parte 4 - Complejidad de merge sort e insertion sort: cálculo y validación
+
+### 4.1 Cálculo teórico
+
+**Recurrencia de merge sort:** `T(n) = 2T(n/2) + Θ(n)`
+
+- **¿Por qué 2 subproblemas?:** porque merge sort divide la lista en dos partes y ordena cada una por separado.
+- **¿Por qué de tamaño n/2?:** porque cada una de las dos partes contiene aproximadamente la mitad de los elementos de la lista original.
+- **¿Cuál es el costo de combinar?:** es 0(n) porque después de ordenar las dos partes, merge sort las combina recorriendo los elementos de ambas listas para construir una sola lista ordenada. En total, se procesan aproximadamente n elementos.
+
+**Resolución por método maestro**
+
+La forma general del método maestro es:
+
+`T(n) = aT(n/b) + f(n)`
+
+Para merge sort tenemos:
+
+- `a = 2`, porque se generan dos subproblemas.
+- `b = 2`, porque cada subproblema tiene aproximadamente la mitad del tamaño.
+- `f(n) = Θ(n)`, porque combinar las dos partes requiere recorrer los elementos.
+
+Calculamos:
+
+`n^(log₂ 2) = n`
+
+Como `f(n) = Θ(n)` y coincide con `n^(log₂ 2)`, se cumple la condición del segundo caso del método maestro.
+
+Por lo tanto:
+
+**Cota final: Θ(n log n)**
+
+Esto significa que el tiempo de merge sort aumenta aproximadamente de acuerdo con el tamaño de los datos multiplicado por el logaritmo del tamaño de los datos.
+
+**Insertion sort, línea a línea**
+
+| Línea del código | Costo | Veces que se ejecuta |
+|---|---|---|
+| `a = list(datos)` | Lineal | `n` |
+| `comparaciones = 0` | Constante | `1` |
+| `for i in range(1, len(a))` | Lineal | `n - 1` |
+| `clave = a[i]` | Constante | `n - 1` |
+| `j = i - 1` | Constante | `n - 1` |
+| `while j >= 0` | Variable | Depende del orden de los datos |
+| `comparaciones += 1` | Constante | Depende del orden de los datos |
+| `if a[j] < clave` | Constante | Depende del orden de los datos |
+| `a[j + 1] = a[j]` | Constante | Depende del orden de los datos |
+| `j -= 1` | Constante | Depende del orden de los datos |
+| `a[j + 1] = clave` | Constante | `n - 1` |
+| `return a, comparaciones` | Constante | `1` |
+
+**Suma de costos en el peor caso:** cuando los datos están en el orden contrario al requerido, cada elemento debe compararse con gran parte de los elementos anteriores y desplazarlos. El número de operaciones crece aproximadamente como `1 + 2 + 3 + ... + (n - 1)`, cuya suma es `n(n - 1)/2`. Por esto, la complejidad en el peor caso es cuadrática.
+
+**Suma de costos en el mejor caso:** cuando los datos ya están ordenados de mayor a menor, cada elemento necesita solamente una comparación antes de continuar. Por esto, el número de operaciones crece proporcionalmente a `n` y la complejidad es lineal.
+
+**Explicación del resultado:** insertion sort puede ser muy eficiente cuando los datos ya están ordenados o casi ordenados, pero cuando los datos están desordenados necesita realizar muchos desplazamientos y comparaciones. Por esta razón, su comportamiento puede empeorar considerablemente a medida que aumenta la cantidad de registros.
+
+**Tabla de complejidades**
+
+| Algoritmo | Mejor caso | Peor caso | Caso promedio |
+|---|---|---|---|
+| Insertion sort | Lineal | Cuadrático | Cuadrático |
+| Merge sort | `n log n` | `n log n` | `n log n` |
+
+### 4.2 Validación experimental
+
+**Cómo se hizo:** se compararon insertion sort y merge sort utilizando el escenario A de Tamiza, donde los registros se encuentran en un orden aleatorio. Se utilizaron los mismos tamaños de entrada de la Parte 3, desde 100 hasta 6400 registros, y se midió únicamente el tiempo de ejecución de cada algoritmo mediante `time.perf_counter()`.
+
+![Tiempo vs. tamaño](graficas/parte4_tiempo.png)
+
+**¿Qué hace cada curva al crecer n?:** la curva de insertion sort aumenta rápidamente a medida que crece el tamaño de entrada. En cambio, merge sort aumenta lentamente para los mismos tamaños. Esto muestra que la diferencia de tiempo entre los dos algoritmos se hace cada vez mayor cuando aumenta la cantidad de registros.
+
+**¿Cuál conviene para Tamiza y por qué?:** para el escenario A, merge sort presenta un mejor comportamiento. Con 6400 registros, merge sort tardó `0.01445` segundos, mientras que insertion sort tardó `0.85482` segundos. Esto significa que, para ese tamaño, insertion sort tardó aproximadamente 59 veces más. La diferencia se vuelve importante para Tamiza porque al trabajar con cantidades mucho mayores, llegando a 1.200.000 registros, el tiempo de ejecucion necesita ser lo más bajo posible.
+
+**¿Coincide con las complejidades?** sí. Los resultados experimentales coinciden con las complejidades calculadas anteriormente. En insertion sort, el tiempo aumenta rápidamente porque en el escenario aleatorio su comportamiento es cuadrático. En cambio, merge sort presenta un crecimiento mucho más lento, consistente con su complejidad `n log n`.
+
+**Tamaños pequeños:** en los tamaños más pequeños la diferencia de tiempo todavía es mas reducida en comparación con los tamaños grandes, sin embargo, a medida que aumenta el tamaño de entrada, la diferencia crece rápidamente.
+
+### 4.3 Concepto técnico a la Secretaría de Salud
+
+Para Tamiza recomiendo utilizar el algoritmo de merge sort como algoritmo principal de ordenamiento. La razón principal es que el canal de entrada puede cambiar sin aviso entre datos aleatorios, casi ordenados o en orden inverso, por lo que no conviene depender de que los datos lleguen en una condición favorable. Aunque insertion sort puede funcionar muy bien con datos casi ordenados, su rendimiento empeora considerablemente cuando los registros están desordenados. Merge sort, en cambio, mantiene un comportamiento más estable. Esta recomendación que menciono está respaldada por las mediciones realizadas en el escenario A. Con 6400 registros, insertion sort tardó mas tiempo e hizo mayor cantidad de comparaciones, mientras que merge sort tardó muy poco y realizó un número bajo comparaciones.
+
+Para estimar el comportamiento con los 1.200.000 registros de Tamiza, se puede extrapolar a partir de estas mediciones. Para insertion sort, tomando los 6400 registros como referencia y considerando su crecimiento cuadrático, se obtiene aproximadamente `0.85482 × (1.200.000 / 6400)² ≈ 30.052 segundos` y esto equivale aproximadamente a 8,35 horas. Para merge sort, tomando la medición de 200.000 registros, donde tardó `0.5510` segundos, y considerando su crecimiento de `n log n`, la estimación para 1.200.000 registros es de aproximadamente 3,8 segundos. Estas cifras son estimaciones, no mediciones directas, por lo que el tiempo real puede variar dependiendo de la infraestructura.
+
+Por lo anterior, no considero suficiente la propuesta de duplicar la velocidad del servidor comprando un servidor del doble de velocidad. En la gráfica, insertion sort tardó `0.85482` segundos con 6400 registros. Incluso suponiendo idealmente que duplicar la velocidad del servidor redujera el tiempo a la mitad, la estimación de 8,35 horas bajaría aproximadamente a 4,17 horas, todavía por encima de la ventana disponible de cuatro horas.
+
+Otra consideración a tener en cuenta puede ser que merge sort necesita más memoria que insertion sort debido a las listas auxiliares utilizadas durante la combinación. Sin embargo, este costo debe evaluarse frente a la necesidad de procesar un volumen muy grande de registros dentro de una ventana fija.
+
+En conclusión, merge sort es la opción recomendada para Tamiza, porque las mediciones muestran un mejor comportamiento al aumentar el tamaño de entrada y ofrece un margen mucho mayor para cumplir la ventana de cuatro horas sin depender de que los datos lleguen ordenados.
