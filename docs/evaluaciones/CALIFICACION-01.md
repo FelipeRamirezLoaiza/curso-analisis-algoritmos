@@ -44,7 +44,7 @@
 
 **Lo que puede mejorar:**
 - Algunas funciones no tienen todos los *type hints* o *docstring* (por ejemplo `medir`, `dividir`, `experimento_comparativo`).
-- Hay detalles de estilo PEP 8: falta una línea en blanco entre funciones, falta el salto de línea final en `algoritmos.py`, los imports quedan después de código en los scripts y una línea es demasiado larga.
+- Hay detalles de estilo PEP 8: falta una línea en blanco entre funciones, los imports quedan después de código en los scripts y una línea es demasiado larga.
 
 ## 4. Calidad del análisis de las gráficas (16 / 20)
 **Lo que hizo bien:**
