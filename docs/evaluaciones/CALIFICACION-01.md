@@ -68,7 +68,7 @@
 - Faltan las instrucciones para reproducir el experimento (activar el entorno y qué comando ejecutar en cada parte).
 
 ## ¿El código funciona?
-Sí. Los dos algoritmos ordenan bien en mis pruebas y los scripts corren sin errores y generan las gráficas.
+Sí. Los dos algoritmos ordenan bien y los scripts corren sin errores y generan las gráficas.
 
 ## Para el próximo laboratorio
 - Ponga su nombre y una sección de instrucciones de reproducción al inicio del informe.
